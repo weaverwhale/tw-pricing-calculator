@@ -2,6 +2,8 @@
 
 A simple pricing calculator for the TW platform.
 
+[https://tw-pricing-calculator.netlify.app/](https://tw-pricing-calculator.netlify.app/)
+
 [![Netlify Status](https://api.netlify.com/api/v1/badges/8be5eab5-c574-4963-98f5-c23461c6c9f6/deploy-status)](https://app.netlify.com/sites/flourishing-granita-70f3a9/deploys)
 
 ## 🏁 Quick Start
