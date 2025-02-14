@@ -47,12 +47,10 @@ const PricingCalculator = () => {
 
   // Calculate annual totals for each payment type
   const calculateAnnualTotals = () => {
-    const monthToMonthAnnual = (calculateMonthToMonth() + calculateAgentMonthly()) * 12;
     const contractAnnual = (calculateBaseMonthly() + calculateAgentMonthly()) * 12;
     const prepayTotal = calculateAnnualPrepay() + calculateAgentMonthly() * 12;
 
     return {
-      monthToMonthAnnual,
       contractAnnual,
       prepayTotal,
     };
@@ -62,7 +60,6 @@ const PricingCalculator = () => {
   const calculateSavings = () => {
     const annualTotals = calculateAnnualTotals();
     return {
-      vsMonthToMonth: annualTotals.monthToMonthAnnual - annualTotals.prepayTotal,
       vsContract: annualTotals.contractAnnual - annualTotals.prepayTotal,
     };
   };
@@ -138,40 +135,9 @@ const PricingCalculator = () => {
 
           {/* Right Column - Pricing Display */}
           <div className="space-y-6">
-            {/* Month-to-Month Pricing */}
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <div className="text-lg font-medium mb-2">Month-to-Month</div>
-              <div className="space-y-1">
-                <div className="flex justify-between">
-                  <span>Core:</span>
-                  <span>${monthToMonthPricing[coreProduct][gmvTier].toLocaleString()}/mo</span>
-                </div>
-                {hasEngageAddon && (
-                  <div className="flex justify-between">
-                    <span>Engage:</span>
-                    <span>${engageMonthToMonthPricing[gmvTier].toLocaleString()}/mo</span>
-                  </div>
-                )}
-                <div className="flex justify-between">
-                  <span>Agent Package:</span>
-                  <span>${calculateAgentMonthly().toLocaleString()}/mo</span>
-                </div>
-                <div className="flex justify-between font-bold pt-2 border-t">
-                  <span>Monthly Total:</span>
-                  <span>
-                    ${(calculateMonthToMonth() + calculateAgentMonthly()).toLocaleString()}/mo
-                  </span>
-                </div>
-                <div className="flex justify-between text-gray-600 text-sm pt-1">
-                  <span>Annual Total:</span>
-                  <span>${calculateAnnualTotals().monthToMonthAnnual.toLocaleString()}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* 12-Month Contract */}
+            {/* Annual Contract (Paid Monthly) */}
             <div className="p-4 bg-blue-50 rounded-lg">
-              <div className="text-lg font-medium mb-2">12-Month Contract (Monthly)</div>
+              <div className="text-lg font-medium mb-2">Annual Contract (Paid Monthly)</div>
               <div className="space-y-1">
                 <div className="flex justify-between">
                   <span>Core:</span>
@@ -200,9 +166,9 @@ const PricingCalculator = () => {
               </div>
             </div>
 
-            {/* Annual Prepay */}
+            {/* Annual Contract (Paid Upfront) */}
             <div className="p-4 bg-green-50 rounded-lg">
-              <div className="text-lg font-medium mb-2">Annual Prepay</div>
+              <div className="text-lg font-medium mb-2">Annual Contract (Paid Upfront)</div>
               <div className="space-y-1">
                 <div className="flex justify-between">
                   <span>Core:</span>
@@ -215,7 +181,7 @@ const PricingCalculator = () => {
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span>Agent Package (12 months):</span>
+                  <span>Agent Package:</span>
                   <span>${(calculateAgentMonthly() * 12).toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between font-bold pt-2 border-t">
@@ -224,11 +190,7 @@ const PricingCalculator = () => {
                 </div>
                 <div className="space-y-1 mt-2 pt-2 border-t text-green-600 text-sm">
                   <div className="flex justify-between">
-                    <span>Savings vs Month-to-Month:</span>
-                    <span>${calculateSavings().vsMonthToMonth.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Savings vs 12-Month Contract:</span>
+                    <span>Savings vs Monthly Payments:</span>
                     <span>${calculateSavings().vsContract.toLocaleString()}</span>
                   </div>
                 </div>
