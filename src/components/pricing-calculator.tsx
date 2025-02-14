@@ -119,7 +119,7 @@ const PricingCalculator = () => {
 
             {/* Agent Package Selection */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium">Agent Package (Paid Monthly)</label>
+              <label className="block text-sm font-medium">Agent Package</label>
               <select
                 value={agentPackage}
                 onChange={(e) => setAgentPackage(e.target.value as AgentPackagePricingKey)}
@@ -181,7 +181,7 @@ const PricingCalculator = () => {
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span>Agent Package:</span>
+                  <span>Agent Package (Paid Monthly):</span>
                   <span>${(calculateAgentMonthly() * 12).toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between font-bold pt-2 border-t">
