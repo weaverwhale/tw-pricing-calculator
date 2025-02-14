@@ -119,7 +119,7 @@ const PricingCalculator = () => {
 
             {/* Agent Package Selection */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium">Agent Package (Monthly Cost)</label>
+              <label className="block text-sm font-medium">Agent Package (Paid Monthly)</label>
               <select
                 value={agentPackage}
                 onChange={(e) => setAgentPackage(e.target.value as AgentPackagePricingKey)}
