@@ -30,7 +30,7 @@ export type GmvTier = (typeof gmvTiers)[number];
 // Month to Month pricing
 export const monthToMonthPricing = {
   starter: {
-    '<250k': 179,
+    '<250K': 179,
     '250K-500K': 239,
     '500K-1M': 359,
     '1M-2.5M': 515,
@@ -54,7 +54,7 @@ export const monthToMonthPricing = {
     '300M-350M': 17699,
   },
   advanced: {
-    '<250k': 259,
+    '<250K': 259,
     '250K-500K': 399,
     '500K-1M': 519,
     '1M-2.5M': 659,
@@ -78,7 +78,7 @@ export const monthToMonthPricing = {
     '300M-350M': 27599,
   },
   professional: {
-    '<250k': 539,
+    '<250K': 539,
     '250K-500K': 659,
     '500K-1M': 819,
     '1M-2.5M': 959,
@@ -109,7 +109,7 @@ export type MonthToMonthPricing = keyof typeof monthToMonthPricing;
 // 12 Month Contract pricing
 export const contractPricing = {
   starter: {
-    '<250k': 149,
+    '<250K': 149,
     '250K-500K': 199,
     '500K-1M': 299,
     '1M-2.5M': 429,
@@ -133,7 +133,7 @@ export const contractPricing = {
     '300M-350M': 14749,
   },
   advanced: {
-    '<250k': 219,
+    '<250K': 219,
     '250K-500K': 329,
     '500K-1M': 429,
     '1M-2.5M': 549,
@@ -157,7 +157,7 @@ export const contractPricing = {
     '300M-350M': 22999,
   },
   professional: {
-    '<250k': 449,
+    '<250K': 449,
     '250K-500K': 549,
     '500K-1M': 679,
     '1M-2.5M': 799,
@@ -185,9 +185,9 @@ export const contractPricing = {
 export type ContractPricingKey = keyof typeof contractPricing.starter;
 export type ContractPricing = keyof typeof contractPricing;
 
-// Month to Month Engage pricing
-export const engageMonthToMonthPricing = {
-  '<250k': 95,
+// Month to Month Retention pricing (renamed from Engage to match the new file)
+export const retentionMonthToMonthPricing = {
+  '<250K': 95,
   '250K-500K': 119,
   '500K-1M': 155,
   '1M-2.5M': 215,
@@ -211,12 +211,11 @@ export const engageMonthToMonthPricing = {
   '300M-350M': 8159,
 };
 
-export type EngageMonthToMonthPricingKey = keyof typeof engageMonthToMonthPricing;
-export type EngageMonthToMonthPricing = keyof typeof engageMonthToMonthPricing;
+export type RetentionMonthToMonthPricingKey = keyof typeof retentionMonthToMonthPricing;
 
-// 12 Month Contract Engage pricing
-export const engageContractPricing = {
-  '<250k': 79,
+// 12 Month Contract Retention pricing (renamed from Engage to match the new file)
+export const retentionContractPricing = {
+  '<250K': 79,
   '250K-500K': 99,
   '500K-1M': 129,
   '1M-2.5M': 179,
@@ -240,8 +239,63 @@ export const engageContractPricing = {
   '300M-350M': 6799,
 };
 
-export type EngageContractPricingKey = keyof typeof engageContractPricing;
-export type EngageContractPricing = keyof typeof engageContractPricing;
+export type RetentionContractPricingKey = keyof typeof retentionContractPricing;
+
+// Month to Month Conversion pricing (new from the NEW file)
+export const conversionMonthToMonthPricing = {
+  '<250K': 23,
+  '250K-500K': 35,
+  '500K-1M': 59,
+  '1M-2.5M': 71,
+  '2.5M-5M': 95,
+  '5M-7.5M': 119,
+  '7.5M-10M': 167,
+  '10M-15M': 191,
+  '15M-20M': 263,
+  '20M-30M': 311,
+  '30M-40M': 431,
+  '40M-50M': 551,
+  '50M-60M': 659,
+  '60M-75M': 743,
+  '75M-100M': 899,
+  '100M-125M': 1139,
+  '125M-150M': 1319,
+  '150M-175M': 1499,
+  '175M-200M': 1679,
+  '200M-250M': 1799,
+  '250M-300M': 2039,
+  '300M-350M': 2399,
+};
+
+export type ConversionMonthToMonthPricingKey = keyof typeof conversionMonthToMonthPricing;
+
+// 12 Month Contract Conversion pricing (new from the NEW file)
+export const conversionContractPricing = {
+  '<250K': 19,
+  '250K-500K': 29,
+  '500K-1M': 49,
+  '1M-2.5M': 59,
+  '2.5M-5M': 79,
+  '5M-7.5M': 99,
+  '7.5M-10M': 139,
+  '10M-15M': 159,
+  '15M-20M': 219,
+  '20M-30M': 259,
+  '30M-40M': 359,
+  '40M-50M': 459,
+  '50M-60M': 549,
+  '60M-75M': 619,
+  '75M-100M': 749,
+  '100M-125M': 949,
+  '125M-150M': 1099,
+  '150M-175M': 1249,
+  '175M-200M': 1399,
+  '200M-250M': 1499,
+  '250M-300M': 1699,
+  '300M-350M': 1999,
+};
+
+export type ConversionContractPricingKey = keyof typeof conversionContractPricing;
 
 export const agentPackagePricing = {
   '0': 0,

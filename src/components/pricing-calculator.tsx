@@ -5,9 +5,11 @@ import {
   type GmvTierKey,
   monthToMonthPricing,
   type MonthToMonthPricing,
-  engageMonthToMonthPricing,
+  retentionMonthToMonthPricing,
+  conversionMonthToMonthPricing,
   contractPricing,
-  engageContractPricing,
+  retentionContractPricing,
+  conversionContractPricing,
   agentPackagePricing,
   type AgentPackagePricingKey,
   type AgentPackagePricing,
@@ -16,21 +18,24 @@ import {
 const PricingCalculator = () => {
   const [gmvTier, setGmvTier] = useState<GmvTierKey>('15M-20M');
   const [coreProduct, setCoreProduct] = useState<MonthToMonthPricing>('advanced');
-  const [hasEngageAddon, setHasEngageAddon] = useState(false);
+  const [hasRetentionAddon, setHasRetentionAddon] = useState(false);
+  const [hasConversionAddon, setHasConversionAddon] = useState(false);
   const [agentPackage, setAgentPackage] = useState<AgentPackagePricing>('0');
 
   // Calculate month-to-month price
   const calculateMonthToMonth = () => {
     const basePrice = monthToMonthPricing[coreProduct][gmvTier];
-    const engagePrice = hasEngageAddon ? engageMonthToMonthPricing[gmvTier] : 0;
-    return basePrice + engagePrice;
+    const retentionPrice = hasRetentionAddon ? retentionMonthToMonthPricing[gmvTier] : 0;
+    const conversionPrice = hasConversionAddon ? conversionMonthToMonthPricing[gmvTier] : 0;
+    return basePrice + retentionPrice + conversionPrice;
   };
 
   // Calculate base monthly price (12-month contract)
   const calculateBaseMonthly = () => {
     const basePrice = contractPricing[coreProduct][gmvTier];
-    const engagePrice = hasEngageAddon ? engageContractPricing[gmvTier] : 0;
-    return basePrice + engagePrice;
+    const retentionPrice = hasRetentionAddon ? retentionContractPricing[gmvTier] : 0;
+    const conversionPrice = hasConversionAddon ? conversionContractPricing[gmvTier] : 0;
+    return basePrice + retentionPrice + conversionPrice;
   };
 
   // Calculate agent monthly price
@@ -41,8 +46,9 @@ const PricingCalculator = () => {
   // Calculate annual prepay (10 months worth of 12-month contract rate)
   const calculateAnnualPrepay = () => {
     const basePrice = contractPricing[coreProduct][gmvTier];
-    const engagePrice = hasEngageAddon ? engageContractPricing[gmvTier] : 0;
-    return (basePrice + engagePrice) * 10;
+    const retentionPrice = hasRetentionAddon ? retentionContractPricing[gmvTier] : 0;
+    const conversionPrice = hasConversionAddon ? conversionContractPricing[gmvTier] : 0;
+    return (basePrice + retentionPrice + conversionPrice) * 10;
   };
 
   // Calculate annual totals for each payment type
@@ -103,18 +109,37 @@ const PricingCalculator = () => {
               </select>
             </div>
 
-            {/* Engage */}
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="engageAddon"
-                checked={hasEngageAddon}
-                onChange={(e) => setHasEngageAddon(e.target.checked)}
-                className="w-4 h-4"
-              />
-              <label htmlFor="engageAddon" className="text-sm font-medium">
-                Include Engage
-              </label>
+            {/* Add-on Options */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-medium">Add-on Options:</h3>
+
+              {/* Retention add-on */}
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="retentionAddon"
+                  checked={hasRetentionAddon}
+                  onChange={(e) => setHasRetentionAddon(e.target.checked)}
+                  className="w-4 h-4"
+                />
+                <label htmlFor="retentionAddon" className="text-sm font-medium">
+                  Retention add-on
+                </label>
+              </div>
+
+              {/* Conversion add-on */}
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="conversionAddon"
+                  checked={hasConversionAddon}
+                  onChange={(e) => setHasConversionAddon(e.target.checked)}
+                  className="w-4 h-4"
+                />
+                <label htmlFor="conversionAddon" className="text-sm font-medium">
+                  Conversion add-on
+                </label>
+              </div>
             </div>
 
             {/* Agent Package Selection */}
@@ -143,10 +168,16 @@ const PricingCalculator = () => {
                   <span>Core:</span>
                   <span>${contractPricing[coreProduct][gmvTier].toLocaleString()}/mo</span>
                 </div>
-                {hasEngageAddon && (
+                {hasRetentionAddon && (
                   <div className="flex justify-between">
-                    <span>Engage:</span>
-                    <span>${engageContractPricing[gmvTier].toLocaleString()}/mo</span>
+                    <span>Retention add-on:</span>
+                    <span>${retentionContractPricing[gmvTier].toLocaleString()}/mo</span>
+                  </div>
+                )}
+                {hasConversionAddon && (
+                  <div className="flex justify-between">
+                    <span>Conversion add-on:</span>
+                    <span>${conversionContractPricing[gmvTier].toLocaleString()}/mo</span>
                   </div>
                 )}
                 <div className="flex justify-between">
@@ -174,10 +205,16 @@ const PricingCalculator = () => {
                   <span>Core:</span>
                   <span>${(contractPricing[coreProduct][gmvTier] * 10).toLocaleString()}</span>
                 </div>
-                {hasEngageAddon && (
+                {hasRetentionAddon && (
                   <div className="flex justify-between">
-                    <span>Engage:</span>
-                    <span>${(engageContractPricing[gmvTier] * 10).toLocaleString()}</span>
+                    <span>Retention add-on:</span>
+                    <span>${(retentionContractPricing[gmvTier] * 10).toLocaleString()}</span>
+                  </div>
+                )}
+                {hasConversionAddon && (
+                  <div className="flex justify-between">
+                    <span>Conversion add-on:</span>
+                    <span>${(conversionContractPricing[gmvTier] * 10).toLocaleString()}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
