@@ -21,6 +21,7 @@ const PricingCalculator = () => {
   const [hasRetentionAddon, setHasRetentionAddon] = useState(false);
   const [hasConversionAddon, setHasConversionAddon] = useState(false);
   const [agentPackage, setAgentPackage] = useState<AgentPackagePricing>('0');
+  const [showAgentPackage, setShowAgentPackage] = useState(false);
 
   // Calculate month-to-month price
   const calculateMonthToMonth = () => {
@@ -68,6 +69,14 @@ const PricingCalculator = () => {
     return {
       vsContract: annualTotals.contractAnnual - annualTotals.prepayTotal,
     };
+  };
+
+  // Toggle agent package visibility - internal use only
+  const toggleAgentPackageVisibility = () => {
+    setShowAgentPackage(!showAgentPackage);
+    if (!showAgentPackage && agentPackage !== '0') {
+      setAgentPackage('0');
+    }
   };
 
   return (
@@ -142,20 +151,22 @@ const PricingCalculator = () => {
               </div>
             </div>
 
-            {/* Agent Package Selection */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium">Agent Package</label>
-              <select
-                value={agentPackage}
-                onChange={(e) => setAgentPackage(e.target.value as AgentPackagePricingKey)}
-                className="w-full p-2 border rounded-md bg-white"
-              >
-                <option value="0">No Agents</option>
-                <option value="5">5 Agents ($1,500/month)</option>
-                <option value="10">10 Agents ($2,500/month)</option>
-                <option value="20">20 Agents ($3,500/month)</option>
-              </select>
-            </div>
+            {/* Agent Package Selection - Conditionally rendered */}
+            {showAgentPackage && (
+              <div className="space-y-2">
+                <label className="block text-sm font-medium">Agent Package</label>
+                <select
+                  value={agentPackage}
+                  onChange={(e) => setAgentPackage(e.target.value as AgentPackagePricingKey)}
+                  className="w-full p-2 border rounded-md bg-white"
+                >
+                  <option value="0">No Agents</option>
+                  <option value="5">5 Agents ($1,500/month)</option>
+                  <option value="10">10 Agents ($2,500/month)</option>
+                  <option value="20">20 Agents ($3,500/month)</option>
+                </select>
+              </div>
+            )}
           </div>
 
           {/* Right Column - Pricing Display */}
@@ -180,10 +191,12 @@ const PricingCalculator = () => {
                     <span>${conversionContractPricing[gmvTier].toLocaleString()}/mo</span>
                   </div>
                 )}
-                <div className="flex justify-between">
-                  <span>Agent Package:</span>
-                  <span>${calculateAgentMonthly().toLocaleString()}/mo</span>
-                </div>
+                {showAgentPackage && agentPackage !== '0' && (
+                  <div className="flex justify-between">
+                    <span>Agent Package:</span>
+                    <span>${calculateAgentMonthly().toLocaleString()}/mo</span>
+                  </div>
+                )}
                 <div className="flex justify-between font-bold pt-2 border-t">
                   <span>Monthly Total:</span>
                   <span>
@@ -217,10 +230,12 @@ const PricingCalculator = () => {
                     <span>${(conversionContractPricing[gmvTier] * 10).toLocaleString()}</span>
                   </div>
                 )}
-                <div className="flex justify-between">
-                  <span>Agent Package (Paid Monthly):</span>
-                  <span>${(calculateAgentMonthly() * 12).toLocaleString()}</span>
-                </div>
+                {showAgentPackage && agentPackage !== '0' && (
+                  <div className="flex justify-between">
+                    <span>Agent Package (Paid Monthly):</span>
+                    <span>${(calculateAgentMonthly() * 12).toLocaleString()}</span>
+                  </div>
+                )}
                 <div className="flex justify-between font-bold pt-2 border-t">
                   <span>Annual Total:</span>
                   <span>${calculateAnnualTotals().prepayTotal.toLocaleString()}</span>
