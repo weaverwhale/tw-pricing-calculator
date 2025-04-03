@@ -297,12 +297,12 @@ export const conversionContractPricing = {
 
 export type ConversionContractPricingKey = keyof typeof conversionContractPricing;
 
-export const agentPackagePricing = {
-  '0': 0,
-  '5': 1500,
-  '10': 2500,
-  '20': 3500,
-};
-
-export type AgentPackagePricingKey = keyof typeof agentPackagePricing;
-export type AgentPackagePricing = keyof typeof agentPackagePricing;
+// Agent Credits Packages
+export const agentCreditsPackages = [
+  { gmvRange: '$0 – $5M', monthlyCredits: '50,000', recommendedPrice: 500 },
+  { gmvRange: '$5M – $20M', monthlyCredits: '110,000', recommendedPrice: 1000 },
+  { gmvRange: '$20M – $50M', monthlyCredits: '185,000', recommendedPrice: 1500 },
+  { gmvRange: '$50M – $100M', monthlyCredits: '300,000', recommendedPrice: 2000 },
+  { gmvRange: '$100M – $200M', monthlyCredits: '475,000', recommendedPrice: 2500 },
+  { gmvRange: '$200M+', monthlyCredits: '750,000', recommendedPrice: 3000 },
+];

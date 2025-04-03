@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import {
   gmvTiers,
@@ -10,25 +10,37 @@ import {
   contractPricing,
   retentionContractPricing,
   conversionContractPricing,
-  agentPackagePricing,
-  type AgentPackagePricingKey,
-  type AgentPackagePricing,
+  agentCreditsPackages,
 } from '@/lib/constants';
+import { getRecommendedAgentPackage } from '@/lib/utils';
 
 const PricingCalculator = () => {
   const [gmvTier, setGmvTier] = useState<GmvTierKey>('15M-20M');
   const [coreProduct, setCoreProduct] = useState<MonthToMonthPricing>('advanced');
   const [hasRetentionAddon, setHasRetentionAddon] = useState(false);
   const [hasConversionAddon, setHasConversionAddon] = useState(false);
-  const [agentPackage, setAgentPackage] = useState<AgentPackagePricing>('0');
-  const [showAgentPackage, setShowAgentPackage] = useState(false);
+  const [hasAgentAddon, setHasAgentAddon] = useState(false);
+  const [selectedAgentPackage, setSelectedAgentPackage] = useState(1); // Default to second package
+
+  // Update agent package when GMV tier changes
+  useEffect(() => {
+    if (hasAgentAddon) {
+      setSelectedAgentPackage(getRecommendedAgentPackage(gmvTier));
+    }
+  }, [gmvTier, hasAgentAddon]);
+
+  // Calculate agent monthly price
+  const calculateAgentMonthly = () => {
+    return hasAgentAddon ? agentCreditsPackages[selectedAgentPackage].recommendedPrice : 0;
+  };
 
   // Calculate month-to-month price
   const calculateMonthToMonth = () => {
     const basePrice = monthToMonthPricing[coreProduct][gmvTier];
     const retentionPrice = hasRetentionAddon ? retentionMonthToMonthPricing[gmvTier] : 0;
     const conversionPrice = hasConversionAddon ? conversionMonthToMonthPricing[gmvTier] : 0;
-    return basePrice + retentionPrice + conversionPrice;
+    const agentPrice = calculateAgentMonthly();
+    return basePrice + retentionPrice + conversionPrice + agentPrice;
   };
 
   // Calculate base monthly price (12-month contract)
@@ -36,26 +48,24 @@ const PricingCalculator = () => {
     const basePrice = contractPricing[coreProduct][gmvTier];
     const retentionPrice = hasRetentionAddon ? retentionContractPricing[gmvTier] : 0;
     const conversionPrice = hasConversionAddon ? conversionContractPricing[gmvTier] : 0;
-    return basePrice + retentionPrice + conversionPrice;
+    const agentPrice = calculateAgentMonthly();
+    return basePrice + retentionPrice + conversionPrice + agentPrice;
   };
 
-  // Calculate agent monthly price
-  const calculateAgentMonthly = () => {
-    return agentPackagePricing[agentPackage];
-  };
-
-  // Calculate annual prepay (10 months worth of 12-month contract rate)
+  // Calculate annual prepay (10 months worth of 12-month contract rate for core products, 10 months for agent)
   const calculateAnnualPrepay = () => {
     const basePrice = contractPricing[coreProduct][gmvTier];
     const retentionPrice = hasRetentionAddon ? retentionContractPricing[gmvTier] : 0;
     const conversionPrice = hasConversionAddon ? conversionContractPricing[gmvTier] : 0;
-    return (basePrice + retentionPrice + conversionPrice) * 10;
+    const coreTotal = (basePrice + retentionPrice + conversionPrice) * 10;
+    const agentTotal = calculateAgentMonthly() * 10;
+    return coreTotal + agentTotal;
   };
 
   // Calculate annual totals for each payment type
   const calculateAnnualTotals = () => {
-    const contractAnnual = (calculateBaseMonthly() + calculateAgentMonthly()) * 12;
-    const prepayTotal = calculateAnnualPrepay() + calculateAgentMonthly() * 12;
+    const contractAnnual = calculateBaseMonthly() * 12;
+    const prepayTotal = calculateAnnualPrepay();
 
     return {
       contractAnnual,
@@ -69,14 +79,6 @@ const PricingCalculator = () => {
     return {
       vsContract: annualTotals.contractAnnual - annualTotals.prepayTotal,
     };
-  };
-
-  // Toggle agent package visibility - internal use only
-  const toggleAgentPackageVisibility = () => {
-    setShowAgentPackage(!showAgentPackage);
-    if (!showAgentPackage && agentPackage !== '0') {
-      setAgentPackage('0');
-    }
   };
 
   return (
@@ -149,24 +151,45 @@ const PricingCalculator = () => {
                   Conversion add-on
                 </label>
               </div>
-            </div>
 
-            {/* Agent Package Selection - Conditionally rendered */}
-            {showAgentPackage && (
-              <div className="space-y-2">
-                <label className="block text-sm font-medium">Agent Package</label>
-                <select
-                  value={agentPackage}
-                  onChange={(e) => setAgentPackage(e.target.value as AgentPackagePricingKey)}
-                  className="w-full p-2 border rounded-md bg-white"
-                >
-                  <option value="0">No Agents</option>
-                  <option value="5">5 Agents ($1,500/month)</option>
-                  <option value="10">10 Agents ($2,500/month)</option>
-                  <option value="20">20 Agents ($3,500/month)</option>
-                </select>
+              {/* Agent credits add-on */}
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="agentAddon"
+                  checked={hasAgentAddon}
+                  onChange={(e) => {
+                    setHasAgentAddon(e.target.checked);
+                    if (e.target.checked) {
+                      setSelectedAgentPackage(getRecommendedAgentPackage(gmvTier));
+                    }
+                  }}
+                  className="w-4 h-4"
+                />
+                <label htmlFor="agentAddon" className="text-sm font-medium">
+                  Agent Credits
+                </label>
               </div>
-            )}
+
+              {/* Agent Credits Package Selection - only visible when agent add-on is checked */}
+              {hasAgentAddon && (
+                <div className="ml-6 mt-2 space-y-2">
+                  <label className="block text-sm font-medium">Agent Credits Package</label>
+                  <select
+                    value={selectedAgentPackage}
+                    onChange={(e) => setSelectedAgentPackage(parseInt(e.target.value))}
+                    className="w-full p-2 border rounded-md bg-white"
+                  >
+                    {agentCreditsPackages.map((pkg, index) => (
+                      <option key={index} value={index}>
+                        {pkg.monthlyCredits} credits - ${pkg.recommendedPrice}/mo
+                        {index === getRecommendedAgentPackage(gmvTier) ? ' (Recommended)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Right Column - Pricing Display */}
@@ -191,17 +214,21 @@ const PricingCalculator = () => {
                     <span>${conversionContractPricing[gmvTier].toLocaleString()}/mo</span>
                   </div>
                 )}
-                {showAgentPackage && agentPackage !== '0' && (
+                {hasAgentAddon && (
                   <div className="flex justify-between">
-                    <span>Agent Package:</span>
-                    <span>${calculateAgentMonthly().toLocaleString()}/mo</span>
+                    <span>
+                      Agent Credits ({agentCreditsPackages[selectedAgentPackage].monthlyCredits}):
+                    </span>
+                    <span>
+                      $
+                      {agentCreditsPackages[selectedAgentPackage].recommendedPrice.toLocaleString()}
+                      /mo
+                    </span>
                   </div>
                 )}
                 <div className="flex justify-between font-bold pt-2 border-t">
                   <span>Monthly Total:</span>
-                  <span>
-                    ${(calculateBaseMonthly() + calculateAgentMonthly()).toLocaleString()}/mo
-                  </span>
+                  <span>${calculateBaseMonthly().toLocaleString()}/mo</span>
                 </div>
                 <div className="flex justify-between text-gray-600 text-sm pt-1">
                   <span>Annual Total:</span>
@@ -230,10 +257,26 @@ const PricingCalculator = () => {
                     <span>${(conversionContractPricing[gmvTier] * 10).toLocaleString()}</span>
                   </div>
                 )}
-                {showAgentPackage && agentPackage !== '0' && (
+                {hasAgentAddon && (
                   <div className="flex justify-between">
-                    <span>Agent Package (Paid Monthly):</span>
-                    <span>${(calculateAgentMonthly() * 12).toLocaleString()}</span>
+                    <span>
+                      Agent Credits (
+                      {(
+                        parseInt(
+                          agentCreditsPackages[selectedAgentPackage].monthlyCredits.replace(
+                            /,/g,
+                            '',
+                          ),
+                        ) * 12
+                      ).toLocaleString()}
+                      ):
+                    </span>
+                    <span>
+                      $
+                      {(
+                        agentCreditsPackages[selectedAgentPackage].recommendedPrice * 10
+                      ).toLocaleString()}
+                    </span>
                   </div>
                 )}
                 <div className="flex justify-between font-bold pt-2 border-t">
