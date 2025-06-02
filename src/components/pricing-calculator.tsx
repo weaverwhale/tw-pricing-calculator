@@ -31,7 +31,12 @@ const PricingCalculator = () => {
 
   // Calculate agent monthly price
   const calculateAgentMonthly = () => {
-    return hasAgentAddon ? agentCreditsPackages[selectedAgentPackage].recommendedPrice : 0;
+    return hasAgentAddon ? agentCreditsPackages[selectedAgentPackage].monthlyPrice : 0;
+  };
+
+  // Calculate agent yearly price for upfront payment
+  const calculateAgentYearly = () => {
+    return hasAgentAddon ? agentCreditsPackages[selectedAgentPackage].yearlyPrice : 0;
   };
 
   // Calculate month-to-month price
@@ -52,13 +57,13 @@ const PricingCalculator = () => {
     return basePrice + retentionPrice + conversionPrice + agentPrice;
   };
 
-  // Calculate annual prepay (10 months worth of 12-month contract rate for core products, 10 months for agent)
+  // Calculate annual prepay (10 months worth of 12-month contract rate for core products, yearly price for agent)
   const calculateAnnualPrepay = () => {
     const basePrice = contractPricing[coreProduct][gmvTier];
     const retentionPrice = hasRetentionAddon ? retentionContractPricing[gmvTier] : 0;
     const conversionPrice = hasConversionAddon ? conversionContractPricing[gmvTier] : 0;
     const coreTotal = (basePrice + retentionPrice + conversionPrice) * 10;
-    const agentTotal = calculateAgentMonthly() * 10;
+    const agentTotal = calculateAgentYearly();
     return coreTotal + agentTotal;
   };
 
@@ -84,7 +89,7 @@ const PricingCalculator = () => {
   return (
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold">TW Pricing Calculator</CardTitle>
+        <CardTitle className="text-2xl font-bold">Pricing Calculator</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -92,7 +97,7 @@ const PricingCalculator = () => {
           <div className="space-y-6">
             {/* GMV Tier Selection */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium">GMV Tier</label>
+              <label className="block text-lg font-medium">GMV Tier</label>
               <select
                 value={gmvTier}
                 onChange={(e) => setGmvTier(e.target.value as GmvTierKey)}
@@ -108,7 +113,7 @@ const PricingCalculator = () => {
 
             {/* Core Product Selection */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium">Core Product</label>
+              <label className="block text-lg font-medium">Core</label>
               <select
                 value={coreProduct}
                 onChange={(e) => setCoreProduct(e.target.value as MonthToMonthPricing)}
@@ -122,7 +127,7 @@ const PricingCalculator = () => {
 
             {/* Add-on Options */}
             <div className="space-y-3">
-              <h3 className="text-sm font-medium">Add-on Options:</h3>
+              <h3 className="text-lg font-medium">Add-on Options:</h3>
 
               {/* Retention add-on */}
               <div className="flex items-center space-x-2">
@@ -182,7 +187,7 @@ const PricingCalculator = () => {
                   >
                     {agentCreditsPackages.map((pkg, index) => (
                       <option key={index} value={index}>
-                        {pkg.monthlyCredits} credits - ${pkg.recommendedPrice}/mo
+                        {pkg.monthlyCredits.toLocaleString()} credits - ${pkg.monthlyPrice}/mo
                         {index === getRecommendedAgentPackage(gmvTier) ? ' (Recommended)' : ''}
                       </option>
                     ))}
@@ -217,12 +222,11 @@ const PricingCalculator = () => {
                 {hasAgentAddon && (
                   <div className="flex justify-between">
                     <span>
-                      Agent Credits ({agentCreditsPackages[selectedAgentPackage].monthlyCredits}):
+                      Agent Credits (
+                      {agentCreditsPackages[selectedAgentPackage].monthlyCredits.toLocaleString()}):
                     </span>
                     <span>
-                      $
-                      {agentCreditsPackages[selectedAgentPackage].recommendedPrice.toLocaleString()}
-                      /mo
+                      ${agentCreditsPackages[selectedAgentPackage].monthlyPrice.toLocaleString()}/mo
                     </span>
                   </div>
                 )}
@@ -261,21 +265,10 @@ const PricingCalculator = () => {
                   <div className="flex justify-between">
                     <span>
                       Agent Credits (
-                      {(
-                        parseInt(
-                          agentCreditsPackages[selectedAgentPackage].monthlyCredits.replace(
-                            /,/g,
-                            '',
-                          ),
-                        ) * 12
-                      ).toLocaleString()}
-                      ):
+                      {agentCreditsPackages[selectedAgentPackage].yearlyCredits.toLocaleString()}):
                     </span>
                     <span>
-                      $
-                      {(
-                        agentCreditsPackages[selectedAgentPackage].recommendedPrice * 10
-                      ).toLocaleString()}
+                      ${agentCreditsPackages[selectedAgentPackage].yearlyPrice.toLocaleString()}
                     </span>
                   </div>
                 )}

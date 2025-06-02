@@ -22,7 +22,7 @@ export const gmvTiers = [
   '200M-250M',
   '250M-300M',
   '300M-350M',
-];
+] as const;
 
 export type GmvTierKey = keyof typeof monthToMonthPricing.starter;
 export type GmvTier = (typeof gmvTiers)[number];
@@ -185,7 +185,7 @@ export const contractPricing = {
 export type ContractPricingKey = keyof typeof contractPricing.starter;
 export type ContractPricing = keyof typeof contractPricing;
 
-// Month to Month Retention pricing (renamed from Engage to match the new file)
+// Month to Month Retention pricing
 export const retentionMonthToMonthPricing = {
   '<250K': 95,
   '250K-500K': 119,
@@ -213,7 +213,7 @@ export const retentionMonthToMonthPricing = {
 
 export type RetentionMonthToMonthPricingKey = keyof typeof retentionMonthToMonthPricing;
 
-// 12 Month Contract Retention pricing (renamed from Engage to match the new file)
+// 12 Month Contract Retention pricing
 export const retentionContractPricing = {
   '<250K': 79,
   '250K-500K': 99,
@@ -241,7 +241,7 @@ export const retentionContractPricing = {
 
 export type RetentionContractPricingKey = keyof typeof retentionContractPricing;
 
-// Month to Month Conversion pricing (new from the NEW file)
+// Month to Month Conversion pricing
 export const conversionMonthToMonthPricing = {
   '<250K': 23,
   '250K-500K': 35,
@@ -269,7 +269,7 @@ export const conversionMonthToMonthPricing = {
 
 export type ConversionMonthToMonthPricingKey = keyof typeof conversionMonthToMonthPricing;
 
-// 12 Month Contract Conversion pricing (new from the NEW file)
+// 12 Month Contract Conversion pricing
 export const conversionContractPricing = {
   '<250K': 19,
   '250K-500K': 29,
@@ -299,10 +299,95 @@ export type ConversionContractPricingKey = keyof typeof conversionContractPricin
 
 // Agent Credits Packages
 export const agentCreditsPackages = [
-  { gmvRange: '$0 – $5M', monthlyCredits: '50,000', recommendedPrice: 500 },
-  { gmvRange: '$5M – $20M', monthlyCredits: '110,000', recommendedPrice: 1000 },
-  { gmvRange: '$20M – $50M', monthlyCredits: '185,000', recommendedPrice: 1500 },
-  { gmvRange: '$50M – $100M', monthlyCredits: '300,000', recommendedPrice: 2000 },
-  { gmvRange: '$100M – $200M', monthlyCredits: '475,000', recommendedPrice: 2500 },
-  { gmvRange: '$200M+', monthlyCredits: '750,000', recommendedPrice: 3000 },
+  {
+    gmvRange: '$0–$250k',
+    monthlyPrice: 75,
+    monthlyCredits: 7500,
+    yearlyPrice: 750,
+    yearlyCredits: 90000,
+  },
+  {
+    gmvRange: '$250k–$500k',
+    monthlyPrice: 125,
+    monthlyCredits: 12500,
+    yearlyPrice: 1250,
+    yearlyCredits: 150000,
+  },
+  {
+    gmvRange: '$500k–$1M',
+    monthlyPrice: 250,
+    monthlyCredits: 25000,
+    yearlyPrice: 2500,
+    yearlyCredits: 300000,
+  },
+  {
+    gmvRange: '$1M–$5M',
+    monthlyPrice: 500,
+    monthlyCredits: 52000,
+    yearlyPrice: 5000,
+    yearlyCredits: 624000,
+  },
+  {
+    gmvRange: '$5M–$20M',
+    monthlyPrice: 1000,
+    monthlyCredits: 106000,
+    yearlyPrice: 10000,
+    yearlyCredits: 1272000,
+  },
+  {
+    gmvRange: '$20M–$50M',
+    monthlyPrice: 1500,
+    monthlyCredits: 165000,
+    yearlyPrice: 15000,
+    yearlyCredits: 1980000,
+  },
+  {
+    gmvRange: '$50M–$75M',
+    monthlyPrice: 2000,
+    monthlyCredits: 230000,
+    yearlyPrice: 20000,
+    yearlyCredits: 2760000,
+  },
+  {
+    gmvRange: '$75M–$100M',
+    monthlyPrice: 2500,
+    monthlyCredits: 301000,
+    yearlyPrice: 25000,
+    yearlyCredits: 3612000,
+  },
+  {
+    gmvRange: '$100M–$200M',
+    monthlyPrice: 3000,
+    monthlyCredits: 375000,
+    yearlyPrice: 30000,
+    yearlyCredits: 4500000,
+  },
+  {
+    gmvRange: '$200M–$300M',
+    monthlyPrice: 5000,
+    monthlyCredits: 667000,
+    yearlyPrice: 50000,
+    yearlyCredits: 8004000,
+  },
+  {
+    gmvRange: '$300M–$400M',
+    monthlyPrice: 7500,
+    monthlyCredits: 1070000,
+    yearlyPrice: 75000,
+    yearlyCredits: 12840000,
+  },
+  {
+    gmvRange: '$400M–$500M',
+    monthlyPrice: 10000,
+    monthlyCredits: 1540000,
+    yearlyPrice: 100000,
+    yearlyCredits: 18480000,
+  },
+  {
+    gmvRange: '$500M+',
+    monthlyPrice: 25000,
+    monthlyCredits: 4170000,
+    yearlyPrice: 250000,
+    yearlyCredits: 50040000,
+  },
 ];
