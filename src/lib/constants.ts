@@ -297,97 +297,20 @@ export const conversionContractPricing = {
 
 export type ConversionContractPricingKey = keyof typeof conversionContractPricing;
 
-// Agent Credits Packages
-export const agentCreditsPackages = [
-  {
-    gmvRange: '$0–$250k',
-    monthlyPrice: 75,
-    monthlyCredits: 7500,
-    yearlyPrice: 750,
-    yearlyCredits: 90000,
-  },
-  {
-    gmvRange: '$250k–$500k',
-    monthlyPrice: 125,
-    monthlyCredits: 12500,
-    yearlyPrice: 1250,
-    yearlyCredits: 150000,
-  },
-  {
-    gmvRange: '$500k–$1M',
-    monthlyPrice: 250,
-    monthlyCredits: 25000,
-    yearlyPrice: 2500,
-    yearlyCredits: 300000,
-  },
-  {
-    gmvRange: '$1M–$5M',
-    monthlyPrice: 500,
-    monthlyCredits: 52000,
-    yearlyPrice: 5000,
-    yearlyCredits: 624000,
-  },
-  {
-    gmvRange: '$5M–$20M',
-    monthlyPrice: 1000,
-    monthlyCredits: 106000,
-    yearlyPrice: 10000,
-    yearlyCredits: 1272000,
-  },
-  {
-    gmvRange: '$20M–$50M',
-    monthlyPrice: 1500,
-    monthlyCredits: 165000,
-    yearlyPrice: 15000,
-    yearlyCredits: 1980000,
-  },
-  {
-    gmvRange: '$50M–$75M',
-    monthlyPrice: 2000,
-    monthlyCredits: 230000,
-    yearlyPrice: 20000,
-    yearlyCredits: 2760000,
-  },
-  {
-    gmvRange: '$75M–$100M',
-    monthlyPrice: 2500,
-    monthlyCredits: 301000,
-    yearlyPrice: 25000,
-    yearlyCredits: 3612000,
-  },
-  {
-    gmvRange: '$100M–$200M',
-    monthlyPrice: 3000,
-    monthlyCredits: 375000,
-    yearlyPrice: 30000,
-    yearlyCredits: 4500000,
-  },
-  {
-    gmvRange: '$200M–$300M',
-    monthlyPrice: 5000,
-    monthlyCredits: 667000,
-    yearlyPrice: 50000,
-    yearlyCredits: 8004000,
-  },
-  {
-    gmvRange: '$300M–$400M',
-    monthlyPrice: 7500,
-    monthlyCredits: 1070000,
-    yearlyPrice: 75000,
-    yearlyCredits: 12840000,
-  },
-  {
-    gmvRange: '$400M–$500M',
-    monthlyPrice: 10000,
-    monthlyCredits: 1540000,
-    yearlyPrice: 100000,
-    yearlyCredits: 18480000,
-  },
-  {
-    gmvRange: '$500M+',
-    monthlyPrice: 25000,
-    monthlyCredits: 4170000,
-    yearlyPrice: 250000,
-    yearlyCredits: 50040000,
-  },
+// Moby Credits Packages - Updated with new pricing structure (including 3,000 free credits for $0 option)
+export const mobyCreditsPackages = [
+  { purchaseAmount: 0, monthlyCredits: 3000, yearlyCredits: 36000, yearlyPrice: 0 }, // 3,000 free credits
+  { purchaseAmount: 75, monthlyCredits: 7500, yearlyCredits: 90000, yearlyPrice: 750 },
+  { purchaseAmount: 125, monthlyCredits: 12500, yearlyCredits: 150000, yearlyPrice: 1250 },
+  { purchaseAmount: 250, monthlyCredits: 25000, yearlyCredits: 300000, yearlyPrice: 2500 },
+  { purchaseAmount: 500, monthlyCredits: 52000, yearlyCredits: 624000, yearlyPrice: 5000 },
+  { purchaseAmount: 1000, monthlyCredits: 106000, yearlyCredits: 1272000, yearlyPrice: 10000 },
+  { purchaseAmount: 1500, monthlyCredits: 165000, yearlyCredits: 1980000, yearlyPrice: 15000 },
+  { purchaseAmount: 2000, monthlyCredits: 230000, yearlyCredits: 2760000, yearlyPrice: 20000 },
+  { purchaseAmount: 2500, monthlyCredits: 301000, yearlyCredits: 3612000, yearlyPrice: 25000 },
+  { purchaseAmount: 3000, monthlyCredits: 375000, yearlyCredits: 4500000, yearlyPrice: 30000 },
+  { purchaseAmount: 5000, monthlyCredits: 667000, yearlyCredits: 8004000, yearlyPrice: 50000 },
+  { purchaseAmount: 7500, monthlyCredits: 1070000, yearlyCredits: 12840000, yearlyPrice: 75000 },
+  { purchaseAmount: 10000, monthlyCredits: 1540000, yearlyCredits: 18480000, yearlyPrice: 100000 },
+  { purchaseAmount: 25000, monthlyCredits: 4170000, yearlyCredits: 50040000, yearlyPrice: 250000 },
 ];
