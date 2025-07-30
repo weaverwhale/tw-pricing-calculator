@@ -1,12 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import {
   gmvTiers,
   type GmvTierKey,
-  monthToMonthPricing,
   type MonthToMonthPricing,
-  retentionMonthToMonthPricing,
-  conversionMonthToMonthPricing,
   contractPricing,
   retentionContractPricing,
   conversionContractPricing,
@@ -15,24 +12,24 @@ import {
 import { getRecommendedMobyPackageForCore, getRecommendedMobyPackage } from '@/lib/utils';
 
 const PricingCalculator = () => {
-  const [planType, setPlanType] = useState('core-plus-moby'); // 'moby-only' or 'core-plus-moby'
+  const [hasCoreProduct, setHasCoreProduct] = useState(true);
+  const [hasMobyCredits, setHasMobyCredits] = useState(true);
   const [gmvTier, setGmvTier] = useState<GmvTierKey>('15M-20M');
   const [coreProduct, setCoreProduct] = useState<MonthToMonthPricing>('advanced');
   const [hasRetentionAddon, setHasRetentionAddon] = useState(false);
   const [hasConversionAddon, setHasConversionAddon] = useState(false);
-  // Initialize with the correct recommended package to avoid flash
-  const [selectedMobyPackage, setSelectedMobyPackage] = useState(() => {
-    return getRecommendedMobyPackageForCore('15M-20M'); // Using the initial gmvTier value
-  });
+  const [selectedMobyPackage, setSelectedMobyPackage] = useState(0);
 
-  // Update Moby package when GMV tier changes (for both plan types)
+  // Update Moby package when GMV tier changes
   useEffect(() => {
-    if (planType === 'core-plus-moby') {
+    if (hasCoreProduct && hasMobyCredits) {
       setSelectedMobyPackage(getRecommendedMobyPackageForCore(gmvTier));
-    } else if (planType === 'moby-only') {
+    } else if (!hasCoreProduct && hasMobyCredits) {
       setSelectedMobyPackage(getRecommendedMobyPackage(gmvTier));
+    } else if (hasCoreProduct && !hasMobyCredits) {
+      setSelectedMobyPackage(0); // Free credits only
     }
-  }, [gmvTier, planType]);
+  }, [gmvTier, hasCoreProduct, hasMobyCredits]);
 
   // Calculate Moby monthly price
   const calculateMobyMonthly = () => {
@@ -44,41 +41,40 @@ const PricingCalculator = () => {
     return mobyCreditsPackages[selectedMobyPackage].yearlyPrice;
   };
 
-  // Calculate month-to-month price
-  const calculateMonthToMonth = () => {
-    if (planType === 'moby-only') {
-      return calculateMobyMonthly();
-    }
-    const basePrice = monthToMonthPricing[coreProduct][gmvTier];
-    const retentionPrice = hasRetentionAddon ? retentionMonthToMonthPricing[gmvTier] : 0;
-    const conversionPrice = hasConversionAddon ? conversionMonthToMonthPricing[gmvTier] : 0;
-    const mobyPrice = calculateMobyMonthly();
-    return basePrice + retentionPrice + conversionPrice + mobyPrice;
-  };
-
   // Calculate base monthly price (12-month contract)
   const calculateBaseMonthly = () => {
-    if (planType === 'moby-only') {
-      return calculateMobyMonthly();
+    let total = 0;
+
+    if (hasCoreProduct) {
+      const basePrice = contractPricing[coreProduct][gmvTier];
+      const retentionPrice = hasRetentionAddon ? retentionContractPricing[gmvTier] : 0;
+      const conversionPrice = hasConversionAddon ? conversionContractPricing[gmvTier] : 0;
+      total += basePrice + retentionPrice + conversionPrice;
     }
-    const basePrice = contractPricing[coreProduct][gmvTier];
-    const retentionPrice = hasRetentionAddon ? retentionContractPricing[gmvTier] : 0;
-    const conversionPrice = hasConversionAddon ? conversionContractPricing[gmvTier] : 0;
-    const mobyPrice = calculateMobyMonthly();
-    return basePrice + retentionPrice + conversionPrice + mobyPrice;
+
+    if (hasMobyCredits && selectedMobyPackage > 0) {
+      total += calculateMobyMonthly();
+    }
+
+    return total;
   };
 
   // Calculate annual prepay (10 months worth of 12-month contract rate for core products, yearly price for Moby)
   const calculateAnnualPrepay = () => {
-    if (planType === 'moby-only') {
-      return calculateMobyYearly();
+    let total = 0;
+
+    if (hasCoreProduct) {
+      const basePrice = contractPricing[coreProduct][gmvTier];
+      const retentionPrice = hasRetentionAddon ? retentionContractPricing[gmvTier] : 0;
+      const conversionPrice = hasConversionAddon ? conversionContractPricing[gmvTier] : 0;
+      total += (basePrice + retentionPrice + conversionPrice) * 10;
     }
-    const basePrice = contractPricing[coreProduct][gmvTier];
-    const retentionPrice = hasRetentionAddon ? retentionContractPricing[gmvTier] : 0;
-    const conversionPrice = hasConversionAddon ? conversionContractPricing[gmvTier] : 0;
-    const coreTotal = (basePrice + retentionPrice + conversionPrice) * 10;
-    const mobyTotal = calculateMobyYearly();
-    return coreTotal + mobyTotal;
+
+    if (hasMobyCredits && selectedMobyPackage > 0) {
+      total += calculateMobyYearly();
+    }
+
+    return total;
   };
 
   // Calculate annual totals for each payment type
@@ -111,41 +107,34 @@ const PricingCalculator = () => {
           <div className="space-y-6">
             {/* Plan Type Selection */}
             <div className="space-y-3">
-              <h3 className="text-lg font-medium">Choose your Triple Whale Plan</h3>
+              <h3 className="text-lg font-medium">Choose your Triple Whale plan(s)</h3>
+              <p className="text-sm text-gray-600">
+                You can select Core plan, Moby Credits, or both.
+              </p>
 
               <div className="flex items-center space-x-2">
                 <input
-                  type="radio"
-                  id="mobyOnly"
-                  name="planType"
-                  value="moby-only"
-                  checked={planType === 'moby-only'}
-                  onChange={(e) => {
-                    setPlanType(e.target.value);
-                    setSelectedMobyPackage(getRecommendedMobyPackage(gmvTier)); // Use recommendation based on GMV tier
-                  }}
+                  type="checkbox"
+                  id="coreProduct"
+                  checked={hasCoreProduct}
+                  onChange={(e) => setHasCoreProduct(e.target.checked)}
                   className="w-4 h-4"
                 />
-                <label htmlFor="mobyOnly" className="text-sm font-medium">
-                  Moby Credits Only
+                <label htmlFor="coreProduct" className="text-sm font-medium">
+                  Core Plan
                 </label>
               </div>
 
               <div className="flex items-center space-x-2">
                 <input
-                  type="radio"
-                  id="corePlusMoby"
-                  name="planType"
-                  value="core-plus-moby"
-                  checked={planType === 'core-plus-moby'}
-                  onChange={(e) => {
-                    setPlanType(e.target.value);
-                    setSelectedMobyPackage(getRecommendedMobyPackageForCore(gmvTier)); // Set recommendation based on GMV tier
-                  }}
+                  type="checkbox"
+                  id="mobyCredits"
+                  checked={hasMobyCredits}
+                  onChange={(e) => setHasMobyCredits(e.target.checked)}
                   className="w-4 h-4"
                 />
-                <label htmlFor="corePlusMoby" className="text-sm font-medium">
-                  Core Plan + Moby Credits
+                <label htmlFor="mobyCredits" className="text-sm font-medium">
+                  Moby Credits
                 </label>
               </div>
             </div>
@@ -167,7 +156,7 @@ const PricingCalculator = () => {
             </div>
 
             {/* Core Product Selection - only for core plans */}
-            {planType === 'core-plus-moby' && (
+            {hasCoreProduct && (
               <div className="space-y-2">
                 <label className="block text-lg font-medium">Core Plan</label>
                 <select
@@ -183,7 +172,7 @@ const PricingCalculator = () => {
             )}
 
             {/* Add-on Options - only for core plans */}
-            {planType === 'core-plus-moby' && (
+            {hasCoreProduct && (
               <div className="space-y-3">
                 <h3 className="text-lg font-medium">Add-on Options:</h3>
 
@@ -217,146 +206,173 @@ const PricingCalculator = () => {
               </div>
             )}
 
-            {/* Moby Credits Package Selection */}
-            <div className="space-y-3">
-              <h3 className="text-lg font-medium">Moby Credits Package</h3>
-              <select
-                value={selectedMobyPackage}
-                onChange={(e) => setSelectedMobyPackage(parseInt(e.target.value))}
-                className="w-full p-2 border rounded-md bg-white"
-              >
-                {mobyCreditsPackages.map((pkg, index) => (
-                  <option key={index} value={index}>
-                    {pkg.monthlyCredits === 0
-                      ? '0 Moby credits - $0/mo'
-                      : `${pkg.monthlyCredits.toLocaleString()} credits - $${pkg.purchaseAmount.toLocaleString()}/mo`}
-                    {planType === 'moby-only' && index === getRecommendedMobyPackage(gmvTier)
-                      ? ' (Recommended)'
-                      : ''}
-                  </option>
-                ))}
-              </select>
+            {/* Moby Credits Package Selection - only when Moby Credits is selected */}
+            {hasMobyCredits && (
+              <div className="space-y-3">
+                <h3 className="text-lg font-medium">Moby Credits Package</h3>
+                <select
+                  value={selectedMobyPackage}
+                  onChange={(e) => setSelectedMobyPackage(parseInt(e.target.value))}
+                  className="w-full p-2 border rounded-md bg-white"
+                >
+                  {mobyCreditsPackages.map((pkg, index) => (
+                    <option key={index} value={index}>
+                      {pkg.purchaseAmount === 0
+                        ? '3,000 Moby credits - $0/mo'
+                        : `${pkg.monthlyCredits.toLocaleString()} credits - $${pkg.purchaseAmount.toLocaleString()}/mo`}
+                    </option>
+                  ))}
+                </select>
 
-              {/* Free Credits Message - shown when $0 option is selected */}
-              {selectedMobyPackage === 0 && (
-                <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                  <p className="text-sm text-blue-800">
-                    3,000 Moby Credits gives you roughly 30-60 chats with Moby, or 10-20 agent runs
-                    across different functions — anomaly detection, performance analysis, creative
-                    element analysis, goal pacing, forecasting, and more. <br />
-                    <span className="text-xs italic">
-                      *Note: Credits fluctuate based on data volume and run frequency. This estimate
-                      does not include Deep Dive.
-                    </span>
-                  </p>
-                </div>
-              )}
-            </div>
+                {/* Free Credits Message - shown when $0 option is selected */}
+                {selectedMobyPackage === 0 && (
+                  <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                    <p className="text-sm text-blue-800">
+                      3,000 Moby Credits gives you roughly 30-60 chats with Moby, or 10-20 agent
+                      runs across different functions — anomaly detection, performance analysis,
+                      creative element analysis, goal pacing, forecasting, and more. <br />
+                      <span className="text-xs italic">
+                        *Note: Credits fluctuate based on data volume and run frequency. This
+                        estimate does not include Deep Dive.
+                      </span>
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Free Credits Note - shown when only Core Plan is selected */}
+            {hasCoreProduct && !hasMobyCredits && (
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <p className="text-sm text-blue-800 font-medium">
+                  Included: 3,000 free Moby Credits per month
+                </p>
+                <p className="text-xs text-blue-600 mt-1">
+                  This gives you roughly 30-60 chats with Moby, or 10-20 agent runs across different
+                  functions.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Right Column - Pricing Display */}
           <div className="space-y-6">
-            {/* Annual Contract (Paid Monthly) */}
-            <div className="p-4 bg-blue-50 rounded-lg">
-              <div className="text-lg font-medium mb-2">Annual Contract (Paid Monthly)</div>
-              <div className="space-y-1">
-                {planType === 'core-plus-moby' && (
-                  <div className="flex justify-between">
-                    <span>Core Plan:</span>
-                    <span>${contractPricing[coreProduct][gmvTier].toLocaleString()}/mo</span>
+            {/* Show pricing only if at least one option is selected */}
+            {hasCoreProduct || hasMobyCredits ? (
+              <>
+                {/* Annual Contract (Paid Monthly) */}
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <div className="text-lg font-medium mb-2">Annual Contract (Paid Monthly)</div>
+                  <div className="space-y-1">
+                    {hasCoreProduct && (
+                      <div className="flex justify-between">
+                        <span>Core Plan:</span>
+                        <span>${contractPricing[coreProduct][gmvTier].toLocaleString()}/mo</span>
+                      </div>
+                    )}
+                    {hasCoreProduct && hasRetentionAddon && (
+                      <div className="flex justify-between">
+                        <span>Retention add-on:</span>
+                        <span>${retentionContractPricing[gmvTier].toLocaleString()}/mo</span>
+                      </div>
+                    )}
+                    {hasCoreProduct && hasConversionAddon && (
+                      <div className="flex justify-between">
+                        <span>Conversion add-on:</span>
+                        <span>${conversionContractPricing[gmvTier].toLocaleString()}/mo</span>
+                      </div>
+                    )}
+                    {hasMobyCredits && selectedMobyPackage > 0 && (
+                      <div className="flex justify-between">
+                        <span>
+                          Moby Credits (
+                          {mobyCreditsPackages[selectedMobyPackage].monthlyCredits.toLocaleString()}
+                          ):
+                        </span>
+                        <span>
+                          $
+                          {mobyCreditsPackages[selectedMobyPackage].purchaseAmount.toLocaleString()}
+                          /mo
+                        </span>
+                      </div>
+                    )}
+                    {hasMobyCredits && selectedMobyPackage === 0 && (
+                      <div className="flex justify-between">
+                        <span>Moby Credits (3,000 free):</span>
+                        <span>$0/mo</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between font-bold pt-2 border-t">
+                      <span>Monthly Total:</span>
+                      <span>${calculateBaseMonthly().toLocaleString()}/mo</span>
+                    </div>
+                    <div className="flex justify-between text-gray-600 text-sm pt-1">
+                      <span>Annual Total:</span>
+                      <span>${calculateAnnualTotals().contractAnnual.toLocaleString()}</span>
+                    </div>
                   </div>
-                )}
-                {planType === 'core-plus-moby' && hasRetentionAddon && (
-                  <div className="flex justify-between">
-                    <span>Retention add-on:</span>
-                    <span>${retentionContractPricing[gmvTier].toLocaleString()}/mo</span>
-                  </div>
-                )}
-                {planType === 'core-plus-moby' && hasConversionAddon && (
-                  <div className="flex justify-between">
-                    <span>Conversion add-on:</span>
-                    <span>${conversionContractPricing[gmvTier].toLocaleString()}/mo</span>
-                  </div>
-                )}
-                {selectedMobyPackage > 0 && (
-                  <div className="flex justify-between">
-                    <span>
-                      Moby Credits (
-                      {mobyCreditsPackages[selectedMobyPackage].monthlyCredits.toLocaleString()}):
-                    </span>
-                    <span>
-                      ${mobyCreditsPackages[selectedMobyPackage].purchaseAmount.toLocaleString()}/mo
-                    </span>
-                  </div>
-                )}
-                {selectedMobyPackage === 0 && (
-                  <div className="flex justify-between">
-                    <span>Moby Credits (3,000 free):</span>
-                    <span>$0/mo</span>
-                  </div>
-                )}
-                <div className="flex justify-between font-bold pt-2 border-t">
-                  <span>Monthly Total:</span>
-                  <span>${calculateBaseMonthly().toLocaleString()}/mo</span>
                 </div>
-                <div className="flex justify-between text-gray-600 text-sm pt-1">
-                  <span>Annual Total:</span>
-                  <span>${calculateAnnualTotals().contractAnnual.toLocaleString()}</span>
-                </div>
-              </div>
-            </div>
 
-            {/* Annual Contract (Paid Upfront) */}
-            <div className="p-4 bg-green-50 rounded-lg">
-              <div className="text-lg font-medium mb-2">Annual Contract (Paid Upfront)</div>
-              <div className="space-y-1">
-                {planType === 'core-plus-moby' && (
-                  <div className="flex justify-between">
-                    <span>Core Plan:</span>
-                    <span>${(contractPricing[coreProduct][gmvTier] * 10).toLocaleString()}</span>
+                {/* Annual Contract (Paid Upfront) */}
+                <div className="p-4 bg-green-50 rounded-lg">
+                  <div className="text-lg font-medium mb-2">Annual Contract (Paid Upfront)</div>
+                  <div className="space-y-1">
+                    {hasCoreProduct && (
+                      <div className="flex justify-between">
+                        <span>Core Plan:</span>
+                        <span>
+                          ${(contractPricing[coreProduct][gmvTier] * 10).toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+                    {hasCoreProduct && hasRetentionAddon && (
+                      <div className="flex justify-between">
+                        <span>Retention add-on:</span>
+                        <span>${(retentionContractPricing[gmvTier] * 10).toLocaleString()}</span>
+                      </div>
+                    )}
+                    {hasCoreProduct && hasConversionAddon && (
+                      <div className="flex justify-between">
+                        <span>Conversion add-on:</span>
+                        <span>${(conversionContractPricing[gmvTier] * 10).toLocaleString()}</span>
+                      </div>
+                    )}
+                    {hasMobyCredits && selectedMobyPackage > 0 && (
+                      <div className="flex justify-between">
+                        <span>
+                          Moby Credits (
+                          {mobyCreditsPackages[selectedMobyPackage].yearlyCredits.toLocaleString()}
+                          ):
+                        </span>
+                        <span>
+                          ${mobyCreditsPackages[selectedMobyPackage].yearlyPrice.toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+                    {hasMobyCredits && selectedMobyPackage === 0 && (
+                      <div className="flex justify-between">
+                        <span>Moby Credits (36,000 free):</span>
+                        <span>$0</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between font-bold pt-2 border-t">
+                      <span>Annual Total:</span>
+                      <span>${calculateAnnualTotals().prepayTotal.toLocaleString()}</span>
+                    </div>
+                    <div className="space-y-1 mt-2 pt-2 border-t text-green-600 text-sm">
+                      <div className="flex justify-between">
+                        <span>Savings vs Monthly Payments:</span>
+                        <span>${calculateSavings().vsContract.toLocaleString()}</span>
+                      </div>
+                    </div>
                   </div>
-                )}
-                {planType === 'core-plus-moby' && hasRetentionAddon && (
-                  <div className="flex justify-between">
-                    <span>Retention add-on:</span>
-                    <span>${(retentionContractPricing[gmvTier] * 10).toLocaleString()}</span>
-                  </div>
-                )}
-                {planType === 'core-plus-moby' && hasConversionAddon && (
-                  <div className="flex justify-between">
-                    <span>Conversion add-on:</span>
-                    <span>${(conversionContractPricing[gmvTier] * 10).toLocaleString()}</span>
-                  </div>
-                )}
-                {selectedMobyPackage > 0 && (
-                  <div className="flex justify-between">
-                    <span>
-                      Moby Credits (
-                      {mobyCreditsPackages[selectedMobyPackage].yearlyCredits.toLocaleString()}):
-                    </span>
-                    <span>
-                      ${mobyCreditsPackages[selectedMobyPackage].yearlyPrice.toLocaleString()}
-                    </span>
-                  </div>
-                )}
-                {selectedMobyPackage === 0 && (
-                  <div className="flex justify-between">
-                    <span>Moby Credits (36,000 free):</span>
-                    <span>$0</span>
-                  </div>
-                )}
-                <div className="flex justify-between font-bold pt-2 border-t">
-                  <span>Annual Total:</span>
-                  <span>${calculateAnnualTotals().prepayTotal.toLocaleString()}</span>
                 </div>
-                <div className="space-y-1 mt-2 pt-2 border-t text-green-600 text-sm">
-                  <div className="flex justify-between">
-                    <span>Savings vs Monthly Payments:</span>
-                    <span>${calculateSavings().vsContract.toLocaleString()}</span>
-                  </div>
-                </div>
+              </>
+            ) : (
+              <div className="p-4 bg-gray-50 rounded-lg text-center">
+                <p className="text-gray-600">Please select at least one option to see pricing.</p>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </CardContent>
