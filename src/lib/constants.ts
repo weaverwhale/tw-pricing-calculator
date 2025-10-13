@@ -297,6 +297,62 @@ export const conversionContractPricing = {
 
 export type ConversionContractPricingKey = keyof typeof conversionContractPricing;
 
+// 12 Month Contract Unified Measurement pricing
+export const unifiedMeasurementContractPricing = {
+  '<250K': 4000,
+  '250K-500K': 4000,
+  '500K-1M': 4000,
+  '1M-2.5M': 4000,
+  '2.5M-5M': 4000,
+  '5M-7.5M': 4000,
+  '7.5M-10M': 4000,
+  '10M-15M': 4000,
+  '15M-20M': 4000,
+  '20M-30M': 5500,
+  '30M-40M': 5500,
+  '40M-50M': 5500,
+  '50M-60M': 7500,
+  '60M-75M': 7500,
+  '75M-100M': 7500,
+  '100M-125M': 10000,
+  '125M-150M': 10000,
+  '150M-175M': 10000,
+  '175M-200M': 10000,
+  '200M-250M': 'Custom',
+  '250M-300M': 'Custom',
+  '300M-350M': 'Custom',
+} as const;
+
+export type UnifiedMeasurementContractPricingKey = keyof typeof unifiedMeasurementContractPricing;
+
+// Annual Prepay Unified Measurement pricing (10 months worth)
+export const unifiedMeasurementPrepayPricing = {
+  '<250K': 40000,
+  '250K-500K': 40000,
+  '500K-1M': 40000,
+  '1M-2.5M': 40000,
+  '2.5M-5M': 40000,
+  '5M-7.5M': 40000,
+  '7.5M-10M': 40000,
+  '10M-15M': 40000,
+  '15M-20M': 40000,
+  '20M-30M': 55000,
+  '30M-40M': 55000,
+  '40M-50M': 55000,
+  '50M-60M': 75000,
+  '60M-75M': 75000,
+  '75M-100M': 75000,
+  '100M-125M': 100000,
+  '125M-150M': 100000,
+  '150M-175M': 100000,
+  '175M-200M': 100000,
+  '200M-250M': 'Custom',
+  '250M-300M': 'Custom',
+  '300M-350M': 'Custom',
+} as const;
+
+export type UnifiedMeasurementPrepayPricingKey = keyof typeof unifiedMeasurementPrepayPricing;
+
 // Moby Credits Packages - Updated with new pricing structure (including 3,000 free credits for $0 option)
 export const mobyCreditsPackages = [
   { purchaseAmount: 0, monthlyCredits: 3000, yearlyCredits: 36000, yearlyPrice: 0 }, // 3,000 free credits

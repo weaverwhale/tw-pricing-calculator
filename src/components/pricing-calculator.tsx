@@ -7,6 +7,8 @@ import {
   contractPricing,
   retentionContractPricing,
   conversionContractPricing,
+  unifiedMeasurementContractPricing,
+  unifiedMeasurementPrepayPricing,
   mobyCreditsPackages,
 } from '@/lib/constants';
 import { getRecommendedMobyPackageForCore, getRecommendedMobyPackage } from '@/lib/utils';
@@ -18,6 +20,7 @@ const PricingCalculator = () => {
   const [coreProduct, setCoreProduct] = useState<MonthToMonthPricing>('advanced');
   const [hasRetentionAddon, setHasRetentionAddon] = useState(false);
   const [hasConversionAddon, setHasConversionAddon] = useState(false);
+  const [hasUnifiedMeasurementAddon, setHasUnifiedMeasurementAddon] = useState(false);
   const [selectedMobyPackage, setSelectedMobyPackage] = useState(0);
 
   // Update Moby package when GMV tier changes
@@ -49,7 +52,11 @@ const PricingCalculator = () => {
       const basePrice = contractPricing[coreProduct][gmvTier];
       const retentionPrice = hasRetentionAddon ? retentionContractPricing[gmvTier] : 0;
       const conversionPrice = hasConversionAddon ? conversionContractPricing[gmvTier] : 0;
-      total += basePrice + retentionPrice + conversionPrice;
+      const unifiedMeasurementPrice =
+        hasUnifiedMeasurementAddon && unifiedMeasurementContractPricing[gmvTier] !== 'Custom'
+          ? unifiedMeasurementContractPricing[gmvTier]
+          : 0;
+      total += basePrice + retentionPrice + conversionPrice + unifiedMeasurementPrice;
     }
 
     if (hasMobyCredits && selectedMobyPackage > 0) {
@@ -68,6 +75,11 @@ const PricingCalculator = () => {
       const retentionPrice = hasRetentionAddon ? retentionContractPricing[gmvTier] : 0;
       const conversionPrice = hasConversionAddon ? conversionContractPricing[gmvTier] : 0;
       total += (basePrice + retentionPrice + conversionPrice) * 10;
+
+      // Unified Measurement uses prepay pricing, not 10x monthly
+      if (hasUnifiedMeasurementAddon && unifiedMeasurementPrepayPricing[gmvTier] !== 'Custom') {
+        total += unifiedMeasurementPrepayPricing[gmvTier];
+      }
     }
 
     if (hasMobyCredits && selectedMobyPackage > 0) {
@@ -203,6 +215,20 @@ const PricingCalculator = () => {
                     Conversion add-on
                   </label>
                 </div>
+
+                {/* Unified Measurement add-on */}
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="unifiedMeasurementAddon"
+                    checked={hasUnifiedMeasurementAddon}
+                    onChange={(e) => setHasUnifiedMeasurementAddon(e.target.checked)}
+                    className="w-4 h-4"
+                  />
+                  <label htmlFor="unifiedMeasurementAddon" className="text-sm font-medium">
+                    Unified Measurement add-on
+                  </label>
+                </div>
               </div>
             )}
 
@@ -282,6 +308,16 @@ const PricingCalculator = () => {
                         <span>${conversionContractPricing[gmvTier].toLocaleString()}/mo</span>
                       </div>
                     )}
+                    {hasCoreProduct && hasUnifiedMeasurementAddon && (
+                      <div className="flex justify-between">
+                        <span>Unified Measurement add-on:</span>
+                        <span>
+                          {unifiedMeasurementContractPricing[gmvTier] === 'Custom'
+                            ? 'Custom'
+                            : `$${unifiedMeasurementContractPricing[gmvTier].toLocaleString()}/mo`}
+                        </span>
+                      </div>
+                    )}
                     {hasMobyCredits && selectedMobyPackage > 0 && (
                       <div className="flex justify-between">
                         <span>
@@ -335,6 +371,16 @@ const PricingCalculator = () => {
                       <div className="flex justify-between">
                         <span>Conversion add-on:</span>
                         <span>${(conversionContractPricing[gmvTier] * 10).toLocaleString()}</span>
+                      </div>
+                    )}
+                    {hasCoreProduct && hasUnifiedMeasurementAddon && (
+                      <div className="flex justify-between">
+                        <span>Unified Measurement add-on:</span>
+                        <span>
+                          {unifiedMeasurementPrepayPricing[gmvTier] === 'Custom'
+                            ? 'Custom'
+                            : `$${unifiedMeasurementPrepayPricing[gmvTier].toLocaleString()}`}
+                        </span>
                       </div>
                     )}
                     {hasMobyCredits && selectedMobyPackage > 0 && (
