@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import {
   gmvTiers,
   type GmvTierKey,
@@ -15,7 +14,7 @@ import { getRecommendedMobyPackageForCore, getRecommendedMobyPackage } from '@/l
 
 const PricingCalculator = () => {
   const [hasCoreProduct, setHasCoreProduct] = useState(true);
-  const [hasMobyCredits, setHasMobyCredits] = useState(true);
+  const [hasMobyAIPro, setHasMobyAIPro] = useState(false);
   const [gmvTier, setGmvTier] = useState<GmvTierKey>('15M-20M');
   const [coreProduct, setCoreProduct] = useState<MonthToMonthPricing>('advanced');
   const [hasRetentionAddon, setHasRetentionAddon] = useState(false);
@@ -25,14 +24,14 @@ const PricingCalculator = () => {
 
   // Update Moby package when GMV tier changes
   useEffect(() => {
-    if (hasCoreProduct && hasMobyCredits) {
+    if (hasCoreProduct && hasMobyAIPro) {
       setSelectedMobyPackage(getRecommendedMobyPackageForCore(gmvTier));
-    } else if (!hasCoreProduct && hasMobyCredits) {
+    } else if (!hasCoreProduct && hasMobyAIPro) {
       setSelectedMobyPackage(getRecommendedMobyPackage(gmvTier));
-    } else if (hasCoreProduct && !hasMobyCredits) {
+    } else if (hasCoreProduct && !hasMobyAIPro) {
       setSelectedMobyPackage(0); // Free credits only
     }
-  }, [gmvTier, hasCoreProduct, hasMobyCredits]);
+  }, [gmvTier, hasCoreProduct, hasMobyAIPro]);
 
   // Calculate Moby monthly price
   const calculateMobyMonthly = () => {
@@ -59,7 +58,7 @@ const PricingCalculator = () => {
       total += basePrice + retentionPrice + conversionPrice + unifiedMeasurementPrice;
     }
 
-    if (hasMobyCredits && selectedMobyPackage > 0) {
+    if (hasMobyAIPro && selectedMobyPackage > 0) {
       total += calculateMobyMonthly();
     }
 
@@ -82,7 +81,7 @@ const PricingCalculator = () => {
       }
     }
 
-    if (hasMobyCredits && selectedMobyPackage > 0) {
+    if (hasMobyAIPro && selectedMobyPackage > 0) {
       total += calculateMobyYearly();
     }
 
@@ -109,48 +108,14 @@ const PricingCalculator = () => {
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold">Pricing Calculator</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
+    <div className="w-full max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">Pricing Calculator</h1>
+      </div>
+      <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left Column - Inputs */}
           <div className="space-y-6">
-            {/* Plan Type Selection */}
-            <div className="space-y-3">
-              <h3 className="text-lg font-medium">Choose your Triple Whale plan(s)</h3>
-              <p className="text-sm text-gray-600">
-                You can select Core plan, Moby Credits, or both.
-              </p>
-
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="coreProduct"
-                  checked={hasCoreProduct}
-                  onChange={(e) => setHasCoreProduct(e.target.checked)}
-                  className="w-4 h-4"
-                />
-                <label htmlFor="coreProduct" className="text-sm font-medium">
-                  Core Plan
-                </label>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="mobyCredits"
-                  checked={hasMobyCredits}
-                  onChange={(e) => setHasMobyCredits(e.target.checked)}
-                  className="w-4 h-4"
-                />
-                <label htmlFor="mobyCredits" className="text-sm font-medium">
-                  Moby Credits
-                </label>
-              </div>
-            </div>
-
             {/* GMV Tier Selection - for both plan types */}
             <div className="space-y-2">
               <label className="block text-lg font-medium">GMV Tier</label>
@@ -188,31 +153,17 @@ const PricingCalculator = () => {
               <div className="space-y-3">
                 <h3 className="text-lg font-medium">Add-on Options:</h3>
 
-                {/* Retention add-on */}
+                {/* Moby AI Pro add-on */}
                 <div className="flex items-center space-x-2">
                   <input
                     type="checkbox"
-                    id="retentionAddon"
-                    checked={hasRetentionAddon}
-                    onChange={(e) => setHasRetentionAddon(e.target.checked)}
+                    id="mobyAIProAddon"
+                    checked={hasMobyAIPro}
+                    onChange={(e) => setHasMobyAIPro(e.target.checked)}
                     className="w-4 h-4"
                   />
-                  <label htmlFor="retentionAddon" className="text-sm font-medium">
-                    Retention add-on
-                  </label>
-                </div>
-
-                {/* Conversion add-on */}
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="conversionAddon"
-                    checked={hasConversionAddon}
-                    onChange={(e) => setHasConversionAddon(e.target.checked)}
-                    className="w-4 h-4"
-                  />
-                  <label htmlFor="conversionAddon" className="text-sm font-medium">
-                    Conversion add-on
+                  <label htmlFor="mobyAIProAddon" className="text-sm font-medium">
+                    Moby AI Pro
                   </label>
                 </div>
 
@@ -226,16 +177,44 @@ const PricingCalculator = () => {
                     className="w-4 h-4"
                   />
                   <label htmlFor="unifiedMeasurementAddon" className="text-sm font-medium">
-                    Unified Measurement add-on
+                    Unified Measurement
+                  </label>
+                </div>
+
+                {/* Retention add-on */}
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="retentionAddon"
+                    checked={hasRetentionAddon}
+                    onChange={(e) => setHasRetentionAddon(e.target.checked)}
+                    className="w-4 h-4"
+                  />
+                  <label htmlFor="retentionAddon" className="text-sm font-medium">
+                    Retention
+                  </label>
+                </div>
+
+                {/* Conversion add-on */}
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="conversionAddon"
+                    checked={hasConversionAddon}
+                    onChange={(e) => setHasConversionAddon(e.target.checked)}
+                    className="w-4 h-4"
+                  />
+                  <label htmlFor="conversionAddon" className="text-sm font-medium">
+                    Conversion
                   </label>
                 </div>
               </div>
             )}
 
-            {/* Moby Credits Package Selection - only when Moby Credits is selected */}
-            {hasMobyCredits && (
+            {/* Moby AI Pro Package Selection - only when Moby AI Pro is selected */}
+            {hasMobyAIPro && (
               <div className="space-y-3">
-                <h3 className="text-lg font-medium">Moby Credits Package</h3>
+                <h3 className="text-lg font-medium">Moby AI Pro Package</h3>
                 <select
                   value={selectedMobyPackage}
                   onChange={(e) => setSelectedMobyPackage(parseInt(e.target.value))}
@@ -254,9 +233,10 @@ const PricingCalculator = () => {
                 {selectedMobyPackage === 0 && (
                   <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
                     <p className="text-sm text-blue-800">
-                      3,000 Moby Credits gives you roughly 30-60 chats with Moby, or 10-20 agent
-                      runs across different functions — anomaly detection, performance analysis,
-                      creative element analysis, goal pacing, forecasting, and more. <br />
+                      3,000 Moby AI Pro credits gives you roughly 30-60 chats with Moby, or 10-20
+                      agent runs across different functions — anomaly detection, performance
+                      analysis, creative element analysis, goal pacing, forecasting, and more.{' '}
+                      <br />
                       <span className="text-xs italic">
                         *Note: Credits fluctuate based on data volume and run frequency. This
                         estimate does not include Deep Dive.
@@ -268,10 +248,10 @@ const PricingCalculator = () => {
             )}
 
             {/* Free Credits Note - shown when only Core Plan is selected */}
-            {hasCoreProduct && !hasMobyCredits && (
+            {hasCoreProduct && !hasMobyAIPro && (
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
                 <p className="text-sm text-blue-800 font-medium">
-                  Included: 3,000 free Moby Credits per month
+                  Included: 3,000 free Moby AI Pro credits per month
                 </p>
                 <p className="text-xs text-blue-600 mt-1">
                   This gives you roughly 30-60 chats with Moby, or 10-20 agent runs across different
@@ -284,7 +264,7 @@ const PricingCalculator = () => {
           {/* Right Column - Pricing Display */}
           <div className="space-y-6">
             {/* Show pricing only if at least one option is selected */}
-            {hasCoreProduct || hasMobyCredits ? (
+            {hasCoreProduct || hasMobyAIPro ? (
               <>
                 {/* Annual Contract (Paid Monthly) */}
                 <div className="p-4 bg-blue-50 rounded-lg">
@@ -298,19 +278,19 @@ const PricingCalculator = () => {
                     )}
                     {hasCoreProduct && hasRetentionAddon && (
                       <div className="flex justify-between">
-                        <span>Retention add-on:</span>
+                        <span>Retention:</span>
                         <span>${retentionContractPricing[gmvTier].toLocaleString()}/mo</span>
                       </div>
                     )}
                     {hasCoreProduct && hasConversionAddon && (
                       <div className="flex justify-between">
-                        <span>Conversion add-on:</span>
+                        <span>Conversion:</span>
                         <span>${conversionContractPricing[gmvTier].toLocaleString()}/mo</span>
                       </div>
                     )}
                     {hasCoreProduct && hasUnifiedMeasurementAddon && (
                       <div className="flex justify-between">
-                        <span>Unified Measurement add-on:</span>
+                        <span>Unified Measurement:</span>
                         <span>
                           {unifiedMeasurementContractPricing[gmvTier] === 'Custom'
                             ? 'Custom'
@@ -318,10 +298,10 @@ const PricingCalculator = () => {
                         </span>
                       </div>
                     )}
-                    {hasMobyCredits && selectedMobyPackage > 0 && (
+                    {hasMobyAIPro && selectedMobyPackage > 0 && (
                       <div className="flex justify-between">
                         <span>
-                          Moby Credits (
+                          Moby AI Pro (
                           {mobyCreditsPackages[selectedMobyPackage].monthlyCredits.toLocaleString()}
                           ):
                         </span>
@@ -332,9 +312,9 @@ const PricingCalculator = () => {
                         </span>
                       </div>
                     )}
-                    {hasMobyCredits && selectedMobyPackage === 0 && (
+                    {hasMobyAIPro && selectedMobyPackage === 0 && (
                       <div className="flex justify-between">
-                        <span>Moby Credits (3,000 free):</span>
+                        <span>Moby AI Pro (3,000 free):</span>
                         <span>$0/mo</span>
                       </div>
                     )}
@@ -363,19 +343,19 @@ const PricingCalculator = () => {
                     )}
                     {hasCoreProduct && hasRetentionAddon && (
                       <div className="flex justify-between">
-                        <span>Retention add-on:</span>
+                        <span>Retention:</span>
                         <span>${(retentionContractPricing[gmvTier] * 10).toLocaleString()}</span>
                       </div>
                     )}
                     {hasCoreProduct && hasConversionAddon && (
                       <div className="flex justify-between">
-                        <span>Conversion add-on:</span>
+                        <span>Conversion:</span>
                         <span>${(conversionContractPricing[gmvTier] * 10).toLocaleString()}</span>
                       </div>
                     )}
                     {hasCoreProduct && hasUnifiedMeasurementAddon && (
                       <div className="flex justify-between">
-                        <span>Unified Measurement add-on:</span>
+                        <span>Unified Measurement:</span>
                         <span>
                           {unifiedMeasurementPrepayPricing[gmvTier] === 'Custom'
                             ? 'Custom'
@@ -383,10 +363,10 @@ const PricingCalculator = () => {
                         </span>
                       </div>
                     )}
-                    {hasMobyCredits && selectedMobyPackage > 0 && (
+                    {hasMobyAIPro && selectedMobyPackage > 0 && (
                       <div className="flex justify-between">
                         <span>
-                          Moby Credits (
+                          Moby AI Pro (
                           {mobyCreditsPackages[selectedMobyPackage].yearlyCredits.toLocaleString()}
                           ):
                         </span>
@@ -395,9 +375,9 @@ const PricingCalculator = () => {
                         </span>
                       </div>
                     )}
-                    {hasMobyCredits && selectedMobyPackage === 0 && (
+                    {hasMobyAIPro && selectedMobyPackage === 0 && (
                       <div className="flex justify-between">
-                        <span>Moby Credits (36,000 free):</span>
+                        <span>Moby AI Pro (36,000 free):</span>
                         <span>$0</span>
                       </div>
                     )}
@@ -421,8 +401,8 @@ const PricingCalculator = () => {
             )}
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
