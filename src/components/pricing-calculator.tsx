@@ -246,19 +246,6 @@ const PricingCalculator = () => {
                 )}
               </div>
             )}
-
-            {/* Free Credits Note - shown when only Core Plan is selected */}
-            {hasCoreProduct && !hasMobyAIPro && (
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
-                <p className="text-sm text-blue-800 font-medium">
-                  Included: 3,000 free Moby AI Pro credits per month
-                </p>
-                <p className="text-xs text-blue-600 mt-1">
-                  This gives you roughly 30-60 chats with Moby, or 10-20 agent runs across different
-                  functions.
-                </p>
-              </div>
-            )}
           </div>
 
           {/* Right Column - Pricing Display */}
